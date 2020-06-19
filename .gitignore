@@ -1,0 +1,17 @@
+# IPython Notebooks
+.ipynb_checkpoints
+
+# pyenv
+ .python-version
+
+# pycache
+ __pycache__/
+
+# VSCode
+.vscode
+
+# cpython files 
+*.pyc
+
+# maccOS Finder files
+.DS_Store

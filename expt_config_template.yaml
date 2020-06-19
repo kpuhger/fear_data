@@ -1,0 +1,25 @@
+Experiment: experiment_name
+# set project path
+project_path: path_to_project
+# set fig path
+fig_path: path_to_figs
+
+raw_data: True
+raw_data_path: path to raw data directory.
+# set raw_data to False if using proc_data
+proc_data_path: path to processed data directory.
+
+# Session info
+train_file: # name of training file
+tone_file: # name of tone test file
+ctx_file: # name of context test file
+# Group info
+group_ids: #enter group info (e.g., AAV, condition)
+ group1: # list of animals in group1
+ group2: # list of animals in group2
+
+# delete if ids entered below
+sex: True
+sex_ids:
+ 'M': # list of males
+ 'F': # list of females
