@@ -1,16 +1,16 @@
 # fear_data
--
+--
 Tools to analyze data from VideoFreeze data files.
 
 
 
 # Install
--
+--
 Add `fear_data` directory to PYTHONPATH or append using sys.path
 
 
 # Modules
--
+--
 This package contains the following modules:
 
 * `dataproc`: Functions for processing data.
