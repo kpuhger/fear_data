@@ -6,7 +6,7 @@ import os
 import inspect
 from itertools import cycle
 from functools import wraps
-from os.path import join as pjoin
+from os.path import join
 import matplotlib.pyplot as plt
 
 ###################################################################################################
@@ -48,7 +48,7 @@ def savefig(func):
         func(*args, **kwargs)
 
         if save_fig:
-            full_path = pjoin(fig_path, fig_name) if fig_path else os.path.expanduser(f'~/Desktop/{fig_name}.png')
+            full_path = join(fig_path, fig_name) if fig_path else os.path.expanduser(f'~/Desktop/{fig_name}.png')
             plt.savefig(full_path)
             
     return decorated

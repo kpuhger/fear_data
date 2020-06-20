@@ -1,9 +1,10 @@
 import csv
 import re
 import os
-from os.path import join as pjoin
+from os.path import join
 import yaml
 import pandas as pd
+import numpy as np
 
 
 ###################################################################################################
@@ -30,7 +31,7 @@ def load_expt_config(config_path):
 
 ###################################################################################################
 
-def load_dat(config_path, session):
+def load_data(config_path, session):
     """loads .csv from VideoFreeze as a pandas df
 
     Parameters
@@ -41,8 +42,10 @@ def load_dat(config_path, session):
     # raise execption if input for session not in config file.
     if session.lower() not in expt_info['sessions']:
         raise ValueError("`session` not found in sessions list - check expt_config.yaml")
+    
+    # find session file
     data_path = expt_info['raw_data_path'] if expt_info['raw_data'] else expt_info['proc_data_path']
-    file = pjoin(data_path, expt_info[f'{session.lower()}_file'])
+    file = join(data_path, expt_info[f'{session.lower()}_file'])
     # internal function
     def find_start(file, start_row='Experiment'):
         """Uses regex to find the first row of real data. This function is used as part
@@ -63,20 +66,26 @@ def load_dat(config_path, session):
             line_num+=1
 
     # convert training file to pandas df
-    df = pd.read_csv(file, skiprows=find_start(file))
+    df = pd.read_csv(file, skiprows=find_start(file))   
+    # bug from VideoFreeze on some csv files, convert Animal to str
+    if df['Animal'].dtype is not np.dtype('str'):
+        df = df.replace('nan', np.NaN).dropna(thresh=2).reset_index()
+        df.loc[:, 'Animal'] = df['Animal'].astype('int').astype('str')  
+    # drop and rename columns
     old_col_list = ['Animal', 'Group', 'Component Name', 'Pct Component Time Freezing', 'Avg Motion Index']
     # reindex to drop extraneous cols
     df = df.reindex(columns=old_col_list)
     # rename columns to remove spaces in colnames
     new_col_list = ['Animal', 'Group', 'Component', 'PctFreeze', 'AvgMotion']
     new_cols = {key:val for (key,val) in zip(df.reindex(columns=old_col_list).columns, new_col_list)}
+    df = df.rename(columns=new_cols) 
     
-    return df.rename(columns=new_cols)
+    return df
 
 
 ###################################################################################################
 
-def clean_dat(config_path, session, prism_format=False):
+def clean_data(config_path, session, prism_format=False):
     """
     Cleans video fear data files by converting animal ids to strings,
     simplifying component names, and adding phase names (if trace or tone fear)
@@ -94,12 +103,12 @@ def clean_dat(config_path, session, prism_format=False):
         return new_list
 
     # load session data
-    df = load_dat(config_path, session)
+    df = load_data(config_path, session)
     # clean up df
-    df['Animal'] = df['Animal'].astype('str')
-    df['Component'] = df['Component'].astype('str')
+    #df['Animal'] = df['Animal'].astype('str')
+    #df['Component'] = df['Component'].astype('str')
 
-    if session is 'ctx':
+    if session is 'context':
         df['Component'] = df['Component'].astype('int')
         df['Phase'] = 'context'
     

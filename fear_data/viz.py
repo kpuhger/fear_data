@@ -8,12 +8,18 @@ from fear_data.plot_utils import savefig, style_plot, check_ax
 
 @savefig
 @style_plot
-def plot_tfc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_size=(16,10), **kwargs):
+def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_size=(16,10), **kwargs):
     
     """ Pointplot of specified `session`.
     
+    Parameters
+    ----------
     df : pandas DataFrame from load_data.clean_dat()
     session : name of session
+    
+    Notes
+    -----
+    - Save fig by adding save_fig=True, can specify fig_path to save to (default is to user Desktop)
     
     """
     
@@ -22,7 +28,7 @@ def plot_tfc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_
     # get bins for tone and trace interval
     bins_list = list(df['Component'].unique())
     # draw grey rectangle around tone bin
-    if session.lower() != 'ctx':
+    if session.lower() != 'context':
         tones = [i-0.5 for i in range(len(bins_list)) if 'tone-' in bins_list[i].lower()]
         [ ax.axvspan(to, to+1, facecolor="grey", alpha=0.15) for to in tones ]
     # draw line to indicate shock
@@ -43,7 +49,8 @@ def plot_tfc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_
     ax.set_ylabel('Freezing (%)')
     ax.set_xlabel('Time (mins)')
     # replace with x-labels with mins if using Component
-    if xvar is 'Component':
+    if session is not 'context':
+    # if xvar is 'Component' and df['Phase'] != 'context':
         min_bins = [i for i in range(len(df['Component'].unique())) if (i+1) % 3 == 0]
         min_labs = [ i+1 for i in range(len(min_bins)) ]
         ax.set_xticks(min_bins)
@@ -57,7 +64,7 @@ def plot_tfc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_
     
 @savefig
 @style_plot    
-def plot_tfc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=None, fig_size=(16,9),**kwargs):
+def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=None, fig_size=(16,9),**kwargs):
     
     """ Pointplot or barplot (specified by kind).
     
@@ -71,8 +78,9 @@ def plot_tfc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=
     
     Notes
     -----
-    For plot aes -> set label_size=36, tick_labelsize=24
-    If `kind` = 'point' -> set markerscale=0.4
+    - For plot aes -> set label_size=36, tick_labelsize=24
+    - If `kind` = 'point' -> set markerscale=0.4
+    - Save fig by adding save_fig=True, can specify fig_path to save to (default is to user Desktop)
     
     """
     if 'hue' in kwargs.keys():
