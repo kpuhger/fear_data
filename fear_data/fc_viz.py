@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-from fear_data.plot_utils import savefig, style_plot, check_ax 
+from .plot_utils import savefig, style_plot, check_ax 
 
 
 ################################################################################

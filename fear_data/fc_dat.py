@@ -105,9 +105,7 @@ def clean_data(config_path, session, prism_format=False):
     # load session data
     df = load_data(config_path, session)
     # clean up df
-    #df['Animal'] = df['Animal'].astype('str')
-    #df['Component'] = df['Component'].astype('str')
-
+    
     if session is 'context':
         df['Component'] = df['Component'].astype('int')
         df['Phase'] = 'context'
