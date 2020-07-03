@@ -68,7 +68,7 @@ def load_data(config_path, session):
     # convert training file to pandas df
     df = pd.read_csv(file, skiprows=find_start(file))   
     # bug from VideoFreeze on some csv files, convert Animal to str
-    if df['Animal'].dtype is not np.dtype('str'):
+    if df['Animal'].dtype is np.dtype('float64'):
         df = df.replace('nan', np.NaN).dropna(thresh=2).reset_index()
         df.loc[:, 'Animal'] = df['Animal'].astype('int').astype('str')  
     # drop and rename columns
@@ -105,12 +105,10 @@ def clean_data(config_path, session, prism_format=False):
     # load session data
     df = load_data(config_path, session)
     # clean up df
-    
     if session is 'context':
         df['Component'] = df['Component'].astype('int')
         df['Phase'] = 'context'
-    
-    elif session in ['train', 'tone']:
+    else:
         df['Component'] = [ df['Component'][x].lower() for x in range(len(df['Component'])) ]
         df['Phase'] = df['Component']
         baseline_vals = get_baseline_vals(df)
