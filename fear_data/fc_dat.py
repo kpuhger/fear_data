@@ -85,7 +85,7 @@ def load_data(config_path, session):
 
 ###################################################################################################
 
-def clean_data(config_path, session, prism_format=False):
+def clean_data(config_path, session, prism_format=False, prism_col='Component'):
     """
     Cleans video fear data files by converting animal ids to strings,
     simplifying component names, and adding phase names (if trace or tone fear)
@@ -129,8 +129,8 @@ def clean_data(config_path, session, prism_format=False):
 
     
     if prism_format is True:
-        col_order = df['Component'].unique()
-        df = df.pivot_table(values=df['PctFreeze'], index=['Animal', 'Group'], columns='Component')
+        col_order = df[prism_col].unique()
+        df = df.pivot_table(values='PctFreeze', index=['Animal', 'Group'], columns=prism_col)
         df = (df
               .reindex(col_order, axis=1)
               .sort_values('Group')
