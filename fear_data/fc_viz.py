@@ -19,7 +19,9 @@ def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_s
     
     Notes
     -----
-    - Save fig by adding save_fig=True, can specify fig_path to save to (default is to user Desktop)
+    - Save fig by adding save_fig=True
+        - Specify file_name if desired
+        - Specify fig_path (default is to user Desktop)
     
     """
     
@@ -80,7 +82,9 @@ def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=N
     -----
     - For plot aes -> set label_size=36, tick_labelsize=24
     - If `kind` = 'point' -> set markerscale=0.4
-    - Save fig by adding save_fig=True, can specify fig_path to save to (default is to user Desktop)
+    - Save fig by adding save_fig=True
+        - Specify file_name if desired
+        - Specify fig_path (default is to user Desktop)
     
     """
     if 'hue' in kwargs.keys():

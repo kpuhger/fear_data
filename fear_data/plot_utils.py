@@ -42,8 +42,8 @@ def savefig(func):
     def decorated(*args, **kwargs):
 
         save_fig = kwargs.pop('save_fig', False)
-        fig_name = kwargs.pop('file_name', None)
-        fig_path = kwargs.pop('file_path', None)
+        fig_name = kwargs.pop('fig_name', None)
+        fig_path = kwargs.pop('fig_path', None)
 
         func(*args, **kwargs)
 
