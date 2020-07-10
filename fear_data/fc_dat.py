@@ -66,10 +66,11 @@ def load_data(config_path, session):
             line_num+=1
 
     # convert training file to pandas df
-    df = pd.read_csv(file, skiprows=find_start(file))   
+    df = pd.read_csv(file, skiprows=find_start(file))
+    # drop NaNs that can get inserted into
+    df = df.replace('nan', np.NaN).dropna(thresh=2).reset_index()   
     # bug from VideoFreeze on some csv files, convert Animal to str
-    if df['Animal'].dtype is np.dtype('float64'):
-        df = df.replace('nan', np.NaN).dropna(thresh=2).reset_index()
+    if df['Animal'].dtype is np.dtype('float64') or df['Animal'].dtype is np.dtype('int64'):
         df.loc[:, 'Animal'] = df['Animal'].astype('int').astype('str')  
     # drop and rename columns
     old_col_list = ['Animal', 'Group', 'Component Name', 'Pct Component Time Freezing', 'Avg Motion Index']
@@ -144,10 +145,12 @@ def clean_data(config_path, session, prism_format=False, prism_col='Component'):
 
 ###################################################################################################
 
-
-
-
-
+def total_df(df, hue=None):
+    if hue is not None:
+        df = df.groupby(['Animal', hue, 'Phase'], as_index=False).mean()
+    else:
+        df = df.groupby(['Animal', 'Phase'], as_index=False).mean()
+    return df
 
 
 ###################################################################################################
