@@ -1,7 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-from .plot_utils import savefig, style_plot, check_ax 
+from .plot_utils import savefig, style_plot, check_ax
+from .fc_dat import total_df 
 
 
 ################################################################################
@@ -52,7 +53,6 @@ def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_s
     ax.set_xlabel('Time (mins)')
     # replace with x-labels with mins if using Component
     if session is not 'context':
-    # if xvar is 'Component' and df['Phase'] != 'context':
         min_bins = [i for i in range(len(df['Component'].unique())) if (i+1) % 3 == 0]
         min_labs = [ i+1 for i in range(len(min_bins)) ]
         ax.set_xticks(min_bins)
@@ -66,7 +66,7 @@ def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_s
     
 @savefig
 @style_plot    
-def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=None, fig_size=(16,9),**kwargs):
+def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=None, fig_size=(16,9), **kwargs):
     
     """ Pointplot or barplot (specified by kind).
     
@@ -91,12 +91,16 @@ def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=N
         df = df.groupby(['Animal', kwargs.get('hue'), 'Phase'], as_index=False).mean()
     else:
         df = df.groupby(['Animal', 'Phase'], as_index=False).mean()
+    df = total_df(df, hue=kwargs.get('hue') if 'hue' in kwargs.keys() else None)
     # create figure
     ax = check_ax(ax, figsize=fig_size)
     # additional plot param for pointplot
     if kind == 'point':
         kwargs['scale'] = 4
         pts = False
+    else:
+        kwargs['edgecolor'] = 'black'
+        kwargs['linewidth'] = 4
     # Determine the plotting function
     # use `kind` to specify type of phase plot
     plot_func = getattr(sns, kind+'plot')
@@ -111,7 +115,8 @@ def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=N
               **kwargs)
     
     if pts == True:
-        sns.swarmplot(x=xvar, y=yvar, color='black', data=df, dodge=True, size=22, **kwargs)
+        sns.swarmplot(x=xvar, y=yvar, data=df,
+                      dodge=True, size=22, ax=ax, **kwargs)
         handles, labels = ax.get_legend_handles_labels()
         nhandles = len(handles)
         first_handle = int(nhandles/2)
