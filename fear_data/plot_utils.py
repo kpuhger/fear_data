@@ -70,11 +70,11 @@ CUSTOM_STYLE_ARGS = ['title_fontsize', 'label_size', 'labelpad', 'tick_labelsize
 STYLE_ARGS = AXIS_STYLE_ARGS + CUSTOM_STYLE_ARGS
 ## Define default values for aesthetic
 # These are all custom style arguments
-TITLE_FONTSIZE = 32
-LABEL_SIZE = 28
+TITLE_FONTSIZE = 40
+LABEL_SIZE = 36
 LABEL_PAD = 5
-TICK_LABELSIZE = 18
-LEGEND_SIZE = 14
+TICK_LABELSIZE = 32
+LEGEND_SIZE = 18
 LEGEND_LOC = 'best'
 MARKERSCALE = 1
 
