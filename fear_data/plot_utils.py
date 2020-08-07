@@ -32,6 +32,26 @@ def check_ax(ax, figsize=None):
 
     return ax
 
+###################################################################################################
+
+# define color palette:
+kp_pal = ['#2b88f0', #blue
+           '#EF862E', #orange
+           '#00B9B9', #cyan
+           '#9147B1', #purple
+           '#28A649', #green
+           '#F97B7B', #salmon
+           '#490035', #violet
+           '#bdbdbd'] #gray
+
+
+def set_palette(pal=kp_pal, show=False):
+    sns.set_palette(pal)
+    if show == True:
+        sns.palplot(pal)
+    elif show == False:
+        return pal
+
 
 ###################################################################################################
 
@@ -118,7 +138,7 @@ def apply_custom_style(ax, style_args=AXIS_STYLE_ARGS, **kwargs):
         handles, labels = ax.get_legend_handles_labels()
         nhandles = len(handles)
         first_handle = int(nhandles/2) if nhandles > 2 else 0
-        ax.legend(handles[first_handle:nhandles], labels[first_handle:nhandles], 
+        ax.legend(handles[first_handle:nhandles], labels[first_handle:nhandles], frameon=False, 
                   prop={'size': kwargs.pop('legend_size', LEGEND_SIZE)},
                   loc=kwargs.pop('legend_loc', LEGEND_LOC),
                   markerscale=kwargs.pop('markerscale', MARKERSCALE))

@@ -4,8 +4,8 @@ import seaborn as sns
 from .plot_utils import savefig, style_plot, check_ax
 from .fc_dat import total_df 
 
-
-################################################################################
+###################################################################################################
+###################################################################################################
 
 @savefig
 @style_plot
@@ -62,7 +62,9 @@ def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_s
         l = ax.legend()
         l.set_title(None)
     sns.despine()
-    
+ 
+ 
+ ###################################################################################################   
     
 @savefig
 @style_plot    
