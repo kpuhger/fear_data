@@ -4,6 +4,7 @@ Modified from neuroDSP: https://github.com/neurodsp-tools/neurodsp/tree/master/n
 """
 import os
 import inspect
+import seaborn as sns
 from itertools import cycle
 from functools import wraps
 from os.path import join
