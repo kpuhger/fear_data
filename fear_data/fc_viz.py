@@ -103,6 +103,7 @@ def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=N
     else:
         kwargs['edgecolor'] = 'black'
         kwargs['linewidth'] = 4
+        plt.tick_params(labelbottom=False)
     # Determine the plotting function
     # use `kind` to specify type of phase plot
     plot_func = getattr(sns, kind+'plot')
