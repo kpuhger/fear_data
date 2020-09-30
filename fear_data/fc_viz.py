@@ -119,6 +119,8 @@ def plot_fc_phase(df, xvar='Phase', yvar='PctFreeze', kind='bar', pts=True, ax=N
               capsize=0.05,
               **kwargs)
     
+    plt.setp(ax.collections, sizes=[1000])
+    
     if pts == True:
         sns.swarmplot(x=xvar, y=yvar, data=df,
                       dodge=True, size=22, ax=ax, **kwargs)
