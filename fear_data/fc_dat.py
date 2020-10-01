@@ -233,7 +233,8 @@ def label_fc_data(config_path, session):
     n_components = len(df.query('Animal == @df.Animal.unique()[0]'))
     session_end = max(comp_labs['end'])
     df['Component'] = np.tile(np.linspace(0, session_end, n_components), len(df.Animal.unique()))
-    df['Component'] = round(df['Component'].astype('float64'), 2)
+    #df['Component'] = round(df['Component'].astype('float64'), 2)
+    df['Component'] = np.around(df['Component'].astype('float64'), 1)
     df['epoch'] = df['Component']
     # label the TFC components
     for i in range(len(comp_labs['phase'])):
@@ -274,13 +275,13 @@ def tfc_trials_df(config_path, session='train', win_start=-20, win_end=60):
     for tone in trials_idx:
         start = comp_labs.loc[tone,'start'] + win_start
         end = comp_labs.loc[tone,'start'] + win_end
-        df.loc[(start <= df.Component) & (df.Component < end), 'Trial'] = int(trial_no)
+        df.loc[(start <= df.Component) & (df.Component <= end), 'Trial'] = int(trial_no)
         trial_no += 1
     #drop time rows outside of (win_start,win_end) trial window    
     df = df.dropna().reset_index(drop=True)
     df['Trial'] = df['Trial'].astype(int)
     # add equally spaced time values for each trial/animal
-    trial_time = np.linspace(win_start, win_end, len(df.query('Animal == @df.Animal[0] and Trial == @df.Trial[0]')))
+    trial_time = np.around(np.linspace(win_start, win_end, len(df.query('Animal == @df.Animal[0] and Trial == @df.Trial[0]'))), 1)
     df['trial_time'] = np.tile(trial_time, n_trials*n_subjects)
 
     return df
