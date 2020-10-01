@@ -2,6 +2,7 @@ import csv
 import re
 import os
 from os.path import join
+from pathlib import Path
 import yaml
 import pandas as pd
 import numpy as np
@@ -14,7 +15,7 @@ def load_expt_config(config_path):
      
      Parameters
      ----------
-     config_path : str to the project yaml file.
+     config_path : path to the project yaml file.
      
      Returns
      -------
@@ -36,7 +37,12 @@ def load_data(config_path, session):
 
     Parameters
     ----------
-    file: path to the .csv to be loaded
+    config_path : path to the project yaml file.
+    session : the session to load data from the config_file
+    
+    Returns
+    -------
+    df : pandas DataFrame of data from the specified session.
     """
     expt_info = load_expt_config(config_path)
     # raise execption if input for session not in config file.
@@ -81,6 +87,15 @@ def load_data(config_path, session):
     new_cols = {key:val for (key,val) in zip(df.reindex(columns=old_col_list).columns, new_col_list)}
     df = df.rename(columns=new_cols) 
     
+    # Fill in Group info    
+    expt_cfg = load_expt_config(config_path)
+    mouseDict = expt_cfg['group_ids']
+    for key,val in mouseDict.items():
+        df.loc[df['Animal'].isin(val), 'Group'] = key
+    if expt_cfg['sex'] is True:
+        for key, val in expt_cfg['sex_ids'].items():
+            df.loc[df['Animal'].isin(val), 'Sex'] = key
+    
     return df
 
 
@@ -89,7 +104,18 @@ def load_data(config_path, session):
 def clean_data(config_path, session, prism_format=False, prism_col='Component'):
     """
     Cleans video fear data files by converting animal ids to strings,
-    simplifying component names, and adding phase names (if trace or tone fear)
+    simplifying component names, and adding phase names (if trace or tone fear).
+    
+    Parameters
+    ----------
+    config_path : path to the project yaml file.
+    session : the session to load data from the config_file
+    prism_format : if `True` will convert the data into long-format for use in Prism.
+    prism_col : column to use for data labels if prim_format == True.
+    
+    Returns
+    -------
+    df : cleaned DataFrame with 'Phase' labeled.
     """
     
     def get_baseline_vals(df):
@@ -119,16 +145,6 @@ def clean_data(config_path, session, prism_format=False, prism_col='Component'):
         df.loc[df['Phase'].str.contains('trace'), 'Phase'] = 'trace'
         df.loc[~df['Phase'].isin(['baseline', 'tone', 'trace']), 'Phase'] = 'iti'
     
-    # Fill in Group info    
-    expt_cfg = load_expt_config(config_path)
-    mouseDict = expt_cfg['group_ids']
-    for key,val in mouseDict.items():
-        df.loc[df['Animal'].isin(val), 'Group'] = key
-    if expt_cfg['sex'] is True:
-        for key, val in expt_cfg['sex_ids'].items():
-            df.loc[df['Animal'].isin(val), 'Sex'] = key
-
-    
     if prism_format is True:
         col_order = df[prism_col].unique()
         df = df.pivot_table(values='PctFreeze', index=['Animal', 'Group'], columns=prism_col)
@@ -146,6 +162,18 @@ def clean_data(config_path, session, prism_format=False, prism_col='Component'):
 ###################################################################################################
 
 def total_df(df, hue=None):
+    """
+    Group DataFrame by 'Phase'. Used for plotting data by Phase.
+    
+    Parameters
+    ----------
+    df : pandas DataFrame to perform grouping on.
+    hue : Default None. Can be used to include an additional grouping variable.
+    
+    Returns
+    -------
+    df : pandas DataFrame grouped by Phase
+    """
     if hue is not None:
         df = df.groupby(['Animal', hue, 'Phase'], as_index=False).mean()
     else:
@@ -154,3 +182,105 @@ def total_df(df, hue=None):
 
 
 ###################################################################################################
+
+def tfc_comp_times(df, session):
+    """
+    Load component times from 'TFC phase components.xlsx'
+    
+    Parameters
+    ----------
+    config_path : path to the project yaml file.
+    session : the session to label.
+    
+    Returns
+    -------
+    comp_labs : pandas DataFrame grouped by Phase.
+    """
+    
+    curr_dir = str(Path(__file__).parents[1]) + '/files/'
+    comp_labs_file = curr_dir + 'TFC phase components.xlsx'
+
+    if 'train' in session.lower():
+        protoc = 'train'
+    elif 'tone' in session.lower():
+        protoc = 'tone'
+    else:
+        raise ValueError('session must include "train" or "tone"')
+    # load TFC phase components.xlsx file
+    comp_labs = pd.read_excel(comp_labs_file, sheet_name=protoc)
+    
+    return comp_labs
+    
+###################################################################################################
+
+def label_fc_data(config_path, session):
+    """
+    * Load fear conditioning data from corresponding session.
+    * Used primarily on data with high temporal resolution (e.g., <1 sec per component).
+    
+    Parameters
+    ----------
+    config_path : path to the project yaml file.
+    session : the session to label.
+    
+    Returns
+    -------
+    df : pandas DataFrame with 'Component' giving session time and 'epoch' the labeled component.
+    """
+    df = load_data(config_path, session)
+    comp_labs = tfc_comp_times(df, session)
+    # add time labels as component labels
+    n_components = len(df.query('Animal == @df.Animal.unique()[0]'))
+    session_end = max(comp_labs['end'])
+    df['Component'] = np.tile(np.linspace(0, session_end, n_components), len(df.Animal.unique()))
+    df['Component'] = round(df['Component'].astype('float64'), 2)
+    df['epoch'] = df['Component']
+    # label the TFC components
+    for i in range(len(comp_labs['phase'])):
+        df.loc[df['Component'].between(comp_labs['start'][i], comp_labs['end'][i]), 'epoch'] = comp_labs['phase'][i]
+    # label tone, trace, and iti for all protocols
+    
+    return df
+
+###################################################################################################
+
+def tfc_trials_df(config_path, session='train', win_start=-20, win_end=60):
+    """
+    * Loads data and adds labels using `label_fc_data`
+    * Add column for `Trial` and `trial_time`
+    * Specify start and end of each trial with `win_start` and `win_end`
+    
+    Parameters
+    ----------
+    config_path : path to the project yaml file.
+    session : the session used to label.
+    win_start : start of window for each trial (Note: tone onset is t=0)
+    win_end : end of window for each trial (Note: tone onset is t=0)
+    
+    Returns
+    -------
+    df : pandas DataFrame of trial-level data
+    """
+    
+    df = label_fc_data(config_path, session)    
+    comp_labs = tfc_comp_times(df, session)
+    # create list of tone values
+    trials_idx = [ tone for tone in range(len(comp_labs['phase'])) if 'tone' in comp_labs['phase'][tone] ]
+    # determine number of tone trials from label
+    n_subjects = len(df['Animal'].unique())
+    n_trials = len(trials_idx)
+    trial_no = int(1)
+    # subset trial data (-20 prior to CS --> 40s after trace/shock)
+    for tone in trials_idx:
+        start = comp_labs.loc[tone,'start'] + win_start
+        end = comp_labs.loc[tone,'start'] + win_end
+        df.loc[(start <= df.Component) & (df.Component < end), 'Trial'] = int(trial_no)
+        trial_no += 1
+    #drop time rows outside of (win_start,win_end) trial window    
+    df = df.dropna().reset_index(drop=True)
+    df['Trial'] = df['Trial'].astype(int)
+    # add equally spaced time values for each trial/animal
+    trial_time = np.linspace(win_start, win_end, len(df.query('Animal == @df.Animal[0] and Trial == @df.Trial[0]')))
+    df['trial_time'] = np.tile(trial_time, n_trials*n_subjects)
+
+    return df
