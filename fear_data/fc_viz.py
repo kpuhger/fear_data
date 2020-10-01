@@ -48,6 +48,9 @@ def plot_fc_bins(df, session, xvar='Component', yvar='PctFreeze', ax=None, fig_s
                   errwidth=6,
                   capsize=0.05,
                   **kwargs)
+    
+    if session.lower() == 'context':
+        plt.setp(ax.collections, sizes=[1000])
 
     ax.set_ylabel('Freezing (%)')
     ax.set_xlabel('Time (mins)')
