@@ -37,12 +37,13 @@ def check_ax(ax, figsize=None):
 
 # define color palette:
 kp_pal = ['#2b88f0', #blue
+          '#FF0036', #red 
            '#EF862E', #orange
-           '#00B9B9', #cyan
-           '#9147B1', #purple
            '#28A649', #green
+           '#9147B1', #purple
+           '#00B9B9', #cyan
            '#F97B7B', #salmon
-           '#490035', #violet
+           '#FFD85B', #yellow
            '#bdbdbd'] #gray
 
 
