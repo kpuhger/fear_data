@@ -234,7 +234,7 @@ def label_fc_data(config_path, session):
     session_end = max(comp_labs['end'])
     df['Component'] = np.tile(np.linspace(0, session_end, n_components), len(df.Animal.unique()))
     #df['Component'] = round(df['Component'].astype('float64'), 2)
-    df['Component'] = np.around(df['Component'].astype('float64'), 1)
+    df['Component'] = np.around(df['Component'].astype('float64'), 2)
     df['epoch'] = df['Component']
     # label the TFC components
     for i in range(len(comp_labs['phase'])):
