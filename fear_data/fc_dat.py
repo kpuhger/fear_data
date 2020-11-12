@@ -175,10 +175,10 @@ def total_df(df, hue=None):
     df : pandas DataFrame grouped by Phase
     """
     if hue is not None:
-        df = df.groupby(['Animal', hue, 'Phase'], as_index=False).mean()
+        return df.groupby(['Animal', hue, 'Phase'], as_index=False).mean()
     else:
-        df = df.groupby(['Animal', 'Phase'], as_index=False).mean()
-    return df
+        return df.groupby(['Animal', 'Phase'], as_index=False).mean()
+
 
 
 ###################################################################################################
